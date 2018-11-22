@@ -5,5 +5,17 @@
   "assets": {
   },
   "color_schemes": {
+    "Glints": {
+      "primary": "222222",
+      "secondary": "ffffff",
+      "tertiary": "57b0e9",
+      "quaternary": "de5c41",
+      "header_background": "ffffff",
+      "header_primary": "333333",
+      "highlight": "ffec52",
+      "danger": "de5c41",
+      "success": "009900",
+      "love": "d97be3"
+    }
   }
 }
