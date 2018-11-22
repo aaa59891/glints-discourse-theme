@@ -1,0 +1,291 @@
+<script type="text/discourse-plugin" version="0.8.13">
+  const h = require("virtual-dom").h;
+  const {
+    isValidSearchTerm
+  } = require("discourse/lib/search");
+  const DiscourseURL = require("discourse/lib/url").default;
+  const Composer = require('discourse/models/composer').default;
+
+  let additionalPanels = [];
+
+  const searchData = {
+    term: ""
+  };
+
+  <!-- from widgets/search-menu.js -->
+  const SearchHelper = {
+    _activeSearch: null,
+    _cancelSearch: null,
+
+     <!-- for cancelling debounced search -->
+    cancel() {
+      if (this._activeSearch) {
+        this._activeSearch.abort();
+      }
+
+      this._cancelSearch = true;
+      Ember.run.later(() => (this._cancelSearch = false), 400);
+    },
+
+    perform(widget) {
+      if (this._cancelSearch) {
+        this._cancelSearch = null;
+        return;
+      }
+
+      if (this._activeSearch) {
+        this._activeSearch.abort();
+        this._activeSearch = null;
+      }
+
+      const {
+        term,
+        typeFilter,
+        contextEnabled
+      } = searchData;
+      const searchContext = contextEnabled ? widget.searchContext() : null;
+      const fullSearchUrl = widget.fullSearchUrl();
+
+      if (!isValidSearchTerm(term)) {
+        searchData.noResults = true;
+        searchData.results = [];
+        searchData.loading = false;
+        searchData.invalidTerm = true;
+
+        widget.scheduleRerender();
+      } else {
+        searchData.invalidTerm = false;
+        this._activeSearch = searchForTerm(term, {
+          typeFilter,
+          searchContext,
+          fullSearchUrl
+        });
+        this._activeSearch
+          .then(content => {
+            searchData.noResults = content.resultTypes.length === 0;
+
+            if (content.grouped_search_result) {
+              searchData.term = content.grouped_search_result.term;
+            }
+
+            searchData.results = content;
+
+            if (searchContext && searchContext.type === "topic") {
+              widget.appEvents.trigger("post-stream:refresh", {
+                force: true
+              });
+              searchData.topicId = searchContext.id;
+            } else {
+              searchData.topicId = null;
+            }
+          })
+          .finally(() => {
+            searchData.loading = false;
+            widget.scheduleRerender();
+            this._activeSearch = null;
+          });
+      }
+    }
+  };
+
+  api.reopenWidget('header-icons', {
+    html(attrs) {
+      if (this.siteSettings.login_required && !this.currentUser) {
+        return [];
+      }
+
+      const hamburger = this.attach("header-dropdown", {
+        title: "hamburger_menu",
+        icon: "bars",
+        iconId: "toggle-hamburger-menu",
+        active: attrs.hamburgerVisible,
+        action: "toggleHamburger",
+        href: "",
+        contents() {
+          if (!attrs.flagCount) {
+            return;
+          }
+          return h(
+            "div.badge-notification.flagged-posts",
+            {
+              attributes: {
+                title: I18n.t("notifications.total_flagged")
+              }
+            },
+            attrs.flagCount
+          );
+        }
+      });
+
+      const icons = [hamburger];
+      if (attrs.user) {
+        icons.push(
+          this.attach("user-dropdown", {
+            active: attrs.userVisible,
+            action: "toggleUserMenu",
+            ringBackdrop: attrs.ringBackdrop,
+            user: attrs.user
+          })
+        );
+      }
+
+      return icons;
+    }
+  });
+
+  api.reopenWidget('header', {
+    searchTermChanged(term) {
+      searchData.term = term;
+      console.log({
+        isValidSearchTerm,
+        result: isValidSearchTerm(term)
+      });
+    },
+
+    <!-- from widgets/search-menu.js -->
+    fullSearchUrl(opts) {
+      const contextEnabled = searchData.contextEnabled;
+
+      const ctx = contextEnabled ? this.searchContext() : null;
+      const type = ctx ? Ember.get(ctx, "type") : null;
+
+      if (contextEnabled && type === "topic") {
+        return;
+      }
+
+      let url = "/search";
+      const params = [];
+
+      if (searchData.term) {
+        let query = "";
+
+        query += `q=${encodeURIComponent(searchData.term)}`;
+
+        if (contextEnabled && ctx) {
+          if (
+            this.currentUser &&
+            ctx.id.toString().toLowerCase() ===
+            this.currentUser.get("username_lower") &&
+            type === "private_messages"
+          ) {
+            query += " in:private";
+          } else {
+            query += encodeURIComponent(" " + type + ":" + ctx.id);
+          }
+        }
+
+        if (query) params.push(query);
+      }
+
+      if (opts && opts.expanded) params.push("expanded=true");
+
+      if (params.length > 0) {
+        url = `${url}?${params.join("&")}`;
+      }
+
+      return Discourse.getURL(url);
+    },
+
+    <!-- from widgets/search-menu.js -->
+    fullSearch() {
+      if (!isValidSearchTerm(searchData.term)) {
+        return;
+      }
+
+      searchData.results = [];
+      searchData.loading = false;
+      SearchHelper.cancel();
+      const url = this.fullSearchUrl();
+      if (url) {
+        this.sendWidgetEvent("linkClicked");
+        DiscourseURL.routeTo(url);
+      } else if (searchData.contextEnabled) {
+        this.triggerSearch();
+      }
+    },
+
+    glintsContent() {
+      const content = [
+        this.attach("search-term", {
+          contextEnabled: false
+        }),
+        this.attach("button", {
+          icon: "search",
+          action: "fullSearch"
+        })
+      ];
+
+      const currentUser = this.currentUser;
+      if (!currentUser) {
+        return content;
+      }
+
+      if (currentUser.can_create_topic) {
+        content.push(this.attach("button", {
+          className: 'btn btn-default',
+          icon: "plus",
+          action: 'createTopic',
+          label: "topic.create",
+        }));
+      }
+      return content;
+    },
+
+    createTopic() {
+      const composerController = this.register.lookup('controller:composer');
+      const model = composerController.get('model');
+      if(model){
+        composerController.set("model.composeState", Composer.OPEN);
+        return;
+      }
+      composerController.open({
+        action: Composer.CREATE_TOPIC,
+        draftKey: Composer.DRAFT
+      });
+    },
+
+    html(attrs, state) {
+      let contents = () => {
+        const panels = [
+          this.attach("header-buttons", attrs),
+          h("div.glints-header-content", this.glintsContent()),
+          this.attach("header-icons", {
+            hamburgerVisible: state.hamburgerVisible,
+            userVisible: state.userVisible,
+            ringBackdrop: state.ringBackdrop,
+            flagCount: attrs.flagCount,
+            user: this.currentUser
+          })
+        ];
+
+        if (state.hamburgerVisible) {
+          panels.push(this.attach("hamburger-menu"));
+        } else if (state.userVisible) {
+          panels.push(this.attach("user-menu"));
+        }
+
+        additionalPanels.map(panel => {
+          if (this.state[panel.toggle]) {
+            panels.push(
+              this.attach(
+                panel.name,
+                panel.transformAttrs.call(this, attrs, state)
+              )
+            );
+          }
+        });
+
+        return panels;
+      };
+
+      let contentsAttrs = {
+        contents,
+        minimized: !!attrs.topic
+      };
+      return h(
+        "div.wrap",
+        this.attach("header-contents", $.extend({}, attrs, contentsAttrs))
+      );
+    },
+  });
+</script>

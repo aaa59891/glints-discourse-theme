@@ -26,3 +26,34 @@
 #reply-control .category-input .category-chooser {
   margin-bottom: 6px;
 }
+
+// header part
+.d-header .contents {
+  display: flex;
+  align-items: center;
+
+  .panel {
+    width: 100%;
+
+    .d-header-icons{
+      margin-left: auto;
+    }
+  }
+}
+
+.glints-header-content {
+  display: flex;
+  justify-content: center;
+  flex: 1;
+  padding: 0 20px;
+  
+  #search-term {
+      width: 50%;
+      margin: 0;
+      margin-right: 1em;
+  }
+  
+  * {
+      margin-right: 1em;
+  }
+}
