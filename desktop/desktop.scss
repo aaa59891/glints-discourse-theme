@@ -1,0 +1,28 @@
+// error message
+#reply-control .category-input {
+  align-self: flex-start;
+  flex-direction: column;
+  margin-bottom: 0px;
+}
+
+#reply-control .title-input {
+  flex-direction: column;
+}
+
+#reply-control #reply-title {
+  width: 100%;
+}
+
+#reply-control #reply-title {
+  right: unset;
+  
+}
+
+.popup-tip.bad {
+  right: unset;
+  position: unset;
+}
+
+#reply-control .category-input .category-chooser {
+  margin-bottom: 6px;
+}

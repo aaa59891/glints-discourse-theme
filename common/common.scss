@@ -1,0 +1,127 @@
+@font-face {
+  font-family: Poppins;
+  src: url(//glints-discourse-id.s3.dualstack.ap-southeast-1.amazonaws.com/original/1X/440dc8992517a306d66e55cb0afed0cfe9b971b5.ttf) format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: normal;
+  letter-spacing: normal;
+}
+
+@font-face {
+  font-family: Poppins;
+  src: url(//glints-discourse-id.s3.dualstack.ap-southeast-1.amazonaws.com/original/1X/cbe48c785f1af6bcd7320609094055e299481da9.ttf) format("truetype");
+  font-weight: bold;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: normal;
+  letter-spacing: normal;
+}
+
+@font-face {
+  font-family: Poppins;
+  src: url(//glints-discourse-id.s3.dualstack.ap-southeast-1.amazonaws.com/original/1X/ecceeecdfea053e23ee31bf56806fc39f9d32e7d.ttf) format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: normal;
+  letter-spacing: normal;
+}
+
+@font-face {
+  font-family: Poppins;
+  src: url(//glints-discourse-id.s3.dualstack.ap-southeast-1.amazonaws.com/original/1X/5c96d1545a51c39e05ee0fcc0c3c9021f14d9c31.ttf) format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: normal;
+  letter-spacing: normal;
+}
+
+@font-face {
+  font-family: Poppins;
+  src: url(//glints-discourse-id.s3.dualstack.ap-southeast-1.amazonaws.com/original/1X/0dbbb6d5a8fa0f9ece415dda4a69c8aa6595fba5.ttf) format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: normal;
+  letter-spacing: normal;
+}
+
+@font-face {
+  font-family: Poppins;
+  src: url(//glints-discourse-id.s3.dualstack.ap-southeast-1.amazonaws.com/original/1X/86a24baced6e165f2d64901ea61b8a6f0efba553.ttf) format("truetype");
+  font-weight: 900;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: normal;
+  letter-spacing: normal;
+}
+
+body {
+  font-family: Poppins, sans-serif;
+}
+
+.d-icon{
+    color: #646464;    
+}
+
+.nav-pills>li.active>a, .nav-pills>li>a.active, .nav-pills>li>a:hover{
+    background-color: transparent;
+    color: black;
+    border-bottom: solid 3px #3fafec;
+}
+
+.btn-primary:hover{
+    background-color: #017eb7;
+}
+
+#create-topic{
+    background-color: #3fafec;
+    color: white;
+}
+
+
+// hidden unnecessary part
+.topic-timeline>.timeline-scrollarea-wrapper,
+.topic-timeline>.timeline-footer-controls,
+#topic-progress-wrapper,
+.about.stats {
+    display: none;
+}
+
+
+// add text to icon
+button.widget-button.btn-flat.no-text.btn-icon:after {
+    margin-left: 2px;
+}
+button.widget-button.btn-flat.toggle-like.like.no-text.btn-icon:after {
+    content: "Upvote";
+}
+
+button.widget-button.btn-flat.share.no-text.btn-icon:after{
+    content: "Share";
+}
+
+button.widget-button.btn-flat.create-flag.no-text.btn-icon:after{
+    content: "Flag";
+}
+
+button.widget-button.btn-flat.bookmark.no-text.btn-icon:after{
+    content: "Save";
+}
+
+button.widget-button.btn-flat.edit.no-text.btn-icon:after{
+    content: "Edit";
+}
+
+button.widget-button.btn-flat.delete.no-text.btn-icon:after{
+    content: "Delete";
+}
+
+
+// error message
+.popup-tip.bad {
+    background-color: unset;
+    color: #de5c41;
+}

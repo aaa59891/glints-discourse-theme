@@ -1,0 +1,19 @@
+// error message
+#reply-control .title-input {
+  display: unset;
+}
+.popup-tip.bad.ember-view {
+  position: unset;
+}
+.popup-tip.bad.ember-view>.close {
+  padding: unset;
+}
+#reply-control .category-input{
+  margin: 5px 0;   
+}
+#reply-control #reply-title{
+  width: 100%;
+} 
+#reply-control .category-input{
+  flex-direction: column;
+}
